@@ -1,0 +1,10 @@
+{
+  "include": ["./test"],
+  "exclude": ["node_modules/*", "__sapper__/*", "public/*"],
+  "compilerOptions": {
+    "target": "ES2020",
+    "esModuleInterop": true,
+    "moduleResolution": "node"
+  },
+  "files": ["./hardhat.config.ts"]
+}
