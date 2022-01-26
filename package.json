@@ -56,5 +56,9 @@
   },
   "overrides": {
     "ethers": "5.5.2"
+  },
+  "dependencies": {
+    "@beehiveinnovation/rain-protocol": "^0.0.16",
+    "@openzeppelin/contracts": "^4.4.2"
   }
 }
