@@ -28,6 +28,12 @@ contract GatedNFT is ERC721, TierByConstruction, Ownable {
         Config config
     );
 
+    enum Transferrable {
+        NonTransferrable,
+        Transferrable,
+        TierGatedTransferrable
+    }
+
     Counters.Counter private _tokenIdCounter;
 
     Config private config;
@@ -36,7 +42,7 @@ contract GatedNFT is ERC721, TierByConstruction, Ownable {
 
     uint256 private maxPerAddress;
 
-    bool private transferrable;
+    Transferrable private transferrable;
 
     uint256 private totalSupply;
 
@@ -45,7 +51,7 @@ contract GatedNFT is ERC721, TierByConstruction, Ownable {
         ITier tier_,
         uint256 minimumStatus_,
         uint256 maxPerAddress_,
-        bool transferrable_,
+        Transferrable transferrable_,
         uint256 totalSupply_
     ) ERC721(config_.name, config_.symbol) TierByConstruction(tier_) {
         config = config_;
@@ -92,12 +98,23 @@ contract GatedNFT is ERC721, TierByConstruction, Ownable {
         address to,
         uint256 tokenId
     ) override internal virtual {
-        require(transferrable, "Transfer not supported");
+        require(
+            transferrable != Transferrable.NonTransferrable,
+            "Transfer not supported"
+        );
+
+        if (transferrable == Transferrable.TierGatedTransferrable) {
+            require(
+                isTier(to, minimumStatus),
+                "Address missing required tier"
+            );
+        }
+
         require(
             balanceOf(to) < maxPerAddress,
             "Address has exhausted allowance"
         );
-        // TODO: Check if recipient has required tier?
+
         super._transfer(from, to, tokenId);
     }
 }

@@ -42,7 +42,7 @@ describe("GatedNFT", async function () {
       tier.address,
       1,
       1,
-      false,
+      0,
       100
     )) as GatedNFT & Contract;
 
@@ -89,15 +89,13 @@ describe("GatedNFT", async function () {
       tier.address,
       1,
       1,
-      false,
+      0,
       100
     )) as GatedNFT & Contract;
 
     expect(await gatedNFT.name()).to.eq("Test");
     expect(await gatedNFT.symbol()).to.eq("TEST");
-    await expect(gatedNFT.tokenURI(0)).to.be.revertedWith(
-      "Nonexistent token"
-    );
+    await expect(gatedNFT.tokenURI(0)).to.be.revertedWith("Nonexistent token");
 
     await gatedNFT.mint(signers[1].address);
 
@@ -125,7 +123,7 @@ describe("GatedNFT", async function () {
       tier.address,
       1,
       1,
-      false,
+      0,
       100
     )) as GatedNFT & Contract;
 
@@ -165,7 +163,7 @@ describe("GatedNFT", async function () {
       tier.address,
       1,
       1,
-      false,
+      0,
       100
     )) as GatedNFT & Contract;
 
@@ -196,7 +194,7 @@ describe("GatedNFT", async function () {
       tier.address,
       1,
       1,
-      false,
+      0,
       1
     )) as GatedNFT & Contract;
 
@@ -205,6 +203,80 @@ describe("GatedNFT", async function () {
     await expect(gatedNFT.mint(signers[2].address)).to.be.revertedWith(
       "Total supply exhausted"
     );
+  });
+
+  it("prevents transfer when disabled", async () => {
+    await tier.setTier(signers[1].address, 1, []);
+    const gatedNFT = (await gatedNFTFactory.deploy(
+      {
+        name: "Test",
+        symbol: "TEST",
+        description: "Testing",
+        animationUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        imageUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        animationHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        imageHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+      },
+      tier.address,
+      1,
+      1,
+      0,
+      100
+    )) as GatedNFT & Contract;
+
+    const mintTx = await gatedNFT.mint(signers[1].address);
+    const mintReceipt = await mintTx.wait();
+    const transferEvent = mintReceipt.events.find(
+      (event) => event.event === "Transfer"
+    );
+    const tokenId = transferEvent.args.tokenId;
+
+    await expect(
+      gatedNFT
+        .connect(signers[1])
+        .transferFrom(signers[1].address, signers[2].address, tokenId)
+    ).to.be.revertedWith("Transfer not supported");
+  });
+
+  it("prevents transferring to addresses that don't meet the tier when tier gated transfer enabled", async () => {
+    await tier.setTier(signers[1].address, 1, []);
+    const gatedNFT = (await gatedNFTFactory.deploy(
+      {
+        name: "Test",
+        symbol: "TEST",
+        description: "Testing",
+        animationUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        imageUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        animationHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        imageHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+      },
+      tier.address,
+      1,
+      1,
+      2,
+      100
+    )) as GatedNFT & Contract;
+
+    const mintTx = await gatedNFT.mint(signers[1].address);
+    const mintReceipt = await mintTx.wait();
+    const transferEvent = mintReceipt.events.find(
+      (event) => event.event === "Transfer"
+    );
+    const tokenId = transferEvent.args.tokenId;
+
+    await expect(
+      gatedNFT
+        .connect(signers[1])
+        .transferFrom(signers[1].address, signers[2].address, tokenId)
+    ).to.be.revertedWith("Address missing required tier");
   });
 
   it("prevents transferring to addresses that have exhausted their allowance", async () => {
@@ -227,7 +299,7 @@ describe("GatedNFT", async function () {
       tier.address,
       1,
       1,
-      true,
+      2,
       100
     )) as GatedNFT & Contract;
 
@@ -247,8 +319,9 @@ describe("GatedNFT", async function () {
     ).to.be.revertedWith("Address has exhausted allowance");
   });
 
-  it("prevents transfer when disabled", async () => {
+  it("allows transferring when all criteria are met", async () => {
     await tier.setTier(signers[1].address, 1, []);
+    await tier.setTier(signers[2].address, 1, []);
     const gatedNFT = (await gatedNFTFactory.deploy(
       {
         name: "Test",
@@ -266,21 +339,27 @@ describe("GatedNFT", async function () {
       tier.address,
       1,
       1,
-      false,
+      2,
       100
     )) as GatedNFT & Contract;
 
     const mintTx = await gatedNFT.mint(signers[1].address);
     const mintReceipt = await mintTx.wait();
-    const transferEvent = mintReceipt.events.find(
+    const mintEvent = mintReceipt.events.find(
       (event) => event.event === "Transfer"
     );
-    const tokenId = transferEvent.args.tokenId;
+    const tokenId = mintEvent.args.tokenId;
 
-    await expect(
-      gatedNFT
-        .connect(signers[1])
-        .transferFrom(signers[1].address, signers[2].address, tokenId)
-    ).to.be.revertedWith("Transfer not supported");
+    const transferTx = await gatedNFT
+      .connect(signers[1])
+      .transferFrom(signers[1].address, signers[2].address, tokenId);
+    const transferReceipt = await transferTx.wait();
+    const transferEvent = transferReceipt.events.find(
+      (event) => event.event === "Transfer"
+    );
+
+    expect(transferEvent.args.from).to.eq(signers[1].address);
+    expect(transferEvent.args.to).to.eq(signers[2].address);
+    expect(transferEvent.args.tokenId).to.eq(tokenId);
   });
 });
