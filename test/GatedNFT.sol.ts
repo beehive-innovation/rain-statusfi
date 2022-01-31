@@ -87,13 +87,15 @@ describe("GatedNFT", async function () {
     await gatedNFT.mint(signers[1].address);
 
     const tokenURI = await gatedNFT.tokenURI(1);
-    const metadata = JSON.parse(atob(tokenURI.split(',')[1]));
+    const metadata = JSON.parse(atob(tokenURI.split(",")[1]));
 
     expect(metadata).to.eql({
-      name: 'Test',
-      description: 'Testing',
-      image: 'https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy',
-      animation_url: 'https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy',
+      name: "Test",
+      description: "Testing",
+      image:
+        "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+      animation_url:
+        "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
     });
   });
 
@@ -104,8 +106,7 @@ describe("GatedNFT", async function () {
         name: "Test",
         symbol: "TEST",
         description: "Testing",
-        animationUrl:
-          "",
+        animationUrl: "",
         imageUrl:
           "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
         animationHash:
@@ -129,12 +130,13 @@ describe("GatedNFT", async function () {
     await gatedNFT.mint(signers[1].address);
 
     const tokenURI = await gatedNFT.tokenURI(1);
-    const metadata = JSON.parse(atob(tokenURI.split(',')[1]));
+    const metadata = JSON.parse(atob(tokenURI.split(",")[1]));
 
     expect(metadata).to.eql({
-      name: 'Test',
-      description: 'Testing',
-      image: 'https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy',
+      name: "Test",
+      description: "Testing",
+      image:
+        "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
     });
   });
 
@@ -147,8 +149,7 @@ describe("GatedNFT", async function () {
         description: "Testing",
         animationUrl:
           "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
-        imageUrl:
-          "",
+        imageUrl: "",
         animationHash:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         imageHash:
@@ -170,12 +171,13 @@ describe("GatedNFT", async function () {
     await gatedNFT.mint(signers[1].address);
 
     const tokenURI = await gatedNFT.tokenURI(1);
-    const metadata = JSON.parse(atob(tokenURI.split(',')[1]));
+    const metadata = JSON.parse(atob(tokenURI.split(",")[1]));
 
     expect(metadata).to.eql({
-      name: 'Test',
-      description: 'Testing',
-      animation_url: 'https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy',
+      name: "Test",
+      description: "Testing",
+      animation_url:
+        "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
     });
   });
 
@@ -186,10 +188,8 @@ describe("GatedNFT", async function () {
         name: "Test",
         symbol: "TEST",
         description: "Testing",
-        animationUrl:
-          "",
-        imageUrl:
-          "",
+        animationUrl: "",
+        imageUrl: "",
         animationHash:
           "0x0000000000000000000000000000000000000000000000000000000000000000",
         imageHash:
@@ -211,11 +211,11 @@ describe("GatedNFT", async function () {
     await gatedNFT.mint(signers[1].address);
 
     const tokenURI = await gatedNFT.tokenURI(1);
-    const metadata = JSON.parse(atob(tokenURI.split(',')[1]));
+    const metadata = JSON.parse(atob(tokenURI.split(",")[1]));
 
     expect(metadata).to.eql({
-      name: 'Test',
-      description: 'Testing',
+      name: "Test",
+      description: "Testing",
     });
   });
 
@@ -548,7 +548,10 @@ describe("GatedNFT", async function () {
       200 // 2%
     );
 
-    const royaltyInfo = await gatedNFT.royaltyInfo(0, ethers.utils.parseEther("1.0"));
+    const royaltyInfo = await gatedNFT.royaltyInfo(
+      0,
+      ethers.utils.parseEther("1.0")
+    );
     expect(royaltyInfo.receiver).to.eq(signers[9].address);
     expect(royaltyInfo.royaltyAmount).to.eq(ethers.utils.parseEther("0.02"));
   });
