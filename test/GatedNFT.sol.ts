@@ -80,7 +80,7 @@ describe("GatedNFT", async function () {
 
     await gatedNFT.mint(signers[1].address);
 
-    expect(await gatedNFT.tokenURI(0)).to.eq(
+    expect(await gatedNFT.tokenURI(1)).to.eq(
       "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy"
     );
   });
@@ -152,7 +152,7 @@ describe("GatedNFT", async function () {
       "0x0000000000000000000000000000000000000000"
     );
     expect(transferEvent.args.to).to.eq(signers[2].address);
-    expect(transferEvent.args.tokenId).to.eq(0);
+    expect(transferEvent.args.tokenId).to.eq(1);
   });
 
   it("prevents minting to addresses that have exhausted their allowance", async () => {

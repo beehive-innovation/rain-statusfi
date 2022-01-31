@@ -61,6 +61,8 @@ contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
         maxPerAddress = maxPerAddress_;
         transferrable = transferrable_;
         maxMintable = maxMintable_;
+        // Set tokenId to start at 1 instead of 0
+        tokenIdCounter.increment();
     }
 
     function tokenURI(uint256 tokenId)
@@ -83,7 +85,7 @@ contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
             "Address has exhausted allowance"
         );
         uint256 tokenId = tokenIdCounter.current();
-        require(tokenId < maxMintable, "Total supply exhausted");
+        require(tokenId <= maxMintable, "Total supply exhausted");
         _safeMint(to, tokenId);
         tokenIdCounter.increment();
         return tokenId;
@@ -116,6 +118,6 @@ contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
 
     /// @dev returns the number of minted tokens
     function totalSupply() external view returns (uint256) {
-        return tokenIdCounter.current();
+        return tokenIdCounter.current() - 1;
     }
 }
