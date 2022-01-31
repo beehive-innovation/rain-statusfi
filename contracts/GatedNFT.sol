@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 // solhint-disable-next-line max-line-length
 import { ITier } from "@beehiveinnovation/rain-protocol/contracts/tier/ITier.sol";
+import { Base64 } from "base64-sol/base64.sol";
 // solhint-disable-next-line max-line-length
 import { TierByConstruction } from "@beehiveinnovation/rain-protocol/contracts/tier/TierByConstruction.sol";
 // solhint-disable-next-line max-line-length
@@ -73,9 +74,7 @@ contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
         returns (string memory)
     {
         require(_exists(tokenId), "Nonexistent token");
-        // TODO: Return JSON object per
-        // https://docs.opensea.io/docs/metadata-standards#metadata-structure
-        return config.imageUrl;
+        return base64JSONMetadata();
     }
 
     function mint(address to) external returns (uint256) {
@@ -119,5 +118,78 @@ contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
     /// @dev returns the number of minted tokens
     function totalSupply() external view returns (uint256) {
         return tokenIdCounter.current() - 1;
+    }
+
+    function base64JSONMetadata()
+        internal
+        view
+        returns (string memory)
+    {
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(
+                        abi.encodePacked(
+                            // solhint-disable-next-line quotes
+                            '{"name": "',
+                            config.name,
+                            // solhint-disable-next-line quotes
+                            '", "description": "',
+                            config.description,
+                            // solhint-disable-next-line quotes
+                            '"',
+                            mediaJSONParts(),
+                            // solhint-disable-next-line quotes
+                            '}'
+                        )
+                    )
+                )
+            );
+    }
+
+    function mediaJSONParts() internal view returns (string memory) {
+        bool hasImage = bytes(config.imageUrl).length > 0;
+        bool hasAnimation = bytes(config.animationUrl).length > 0;
+        if (hasImage && hasAnimation) {
+            return
+                string(
+                    abi.encodePacked(
+                    // solhint-disable-next-line quotes
+                        ', "image": "',
+                        config.imageUrl,
+                        // solhint-disable-next-line quotes
+                        '", "animation_url": "',
+                        config.animationUrl,
+                        // solhint-disable-next-line quotes
+                        '"'
+                    )
+                );
+        }
+        if (hasImage) {
+            return
+                string(
+                    abi.encodePacked(
+                        // solhint-disable-next-line quotes
+                        ', "image": "',
+                        config.imageUrl,
+                        // solhint-disable-next-line quotes
+                        '"'
+                    )
+                );
+        }
+        if (hasAnimation) {
+            return
+                string(
+                    abi.encodePacked(
+                        // solhint-disable-next-line quotes
+                        ', "animation_url": "',
+                        config.animationUrl,
+                        // solhint-disable-next-line quotes
+                        '"'
+                    )
+                );
+        }
+        return "";
     }
 }

@@ -51,7 +51,7 @@ describe("GatedNFT", async function () {
     tier = (await tierFactory.deploy()) as ReadWriteTier & Contract;
   });
 
-  it("returns metadata", async () => {
+  it("returns metadata when both URLs are specified", async () => {
     await tier.setTier(signers[1].address, 1, []);
     const gatedNFT = await deployGatedNFT(
       {
@@ -80,9 +80,131 @@ describe("GatedNFT", async function () {
 
     await gatedNFT.mint(signers[1].address);
 
-    expect(await gatedNFT.tokenURI(1)).to.eq(
-      "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy"
+    const tokenURI = await gatedNFT.tokenURI(1);
+    const metadata = JSON.parse(atob(tokenURI.split(',')[1]));
+
+    expect(metadata).to.eql({
+      name: 'Test',
+      description: 'Testing',
+      image: 'https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy',
+      animation_url: 'https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy',
+    });
+  });
+
+  it("returns metadata when only image URL is specified", async () => {
+    await tier.setTier(signers[1].address, 1, []);
+    const gatedNFT = await deployGatedNFT(
+      {
+        name: "Test",
+        symbol: "TEST",
+        description: "Testing",
+        animationUrl:
+          "",
+        imageUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        animationHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        imageHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+      },
+      tier.address,
+      1,
+      1,
+      0,
+      100
     );
+
+    expect(await gatedNFT.name()).to.eq("Test");
+    expect(await gatedNFT.symbol()).to.eq("TEST");
+    await expect(gatedNFT.tokenURI(0)).to.be.revertedWith("Nonexistent token");
+
+    await gatedNFT.mint(signers[1].address);
+
+    const tokenURI = await gatedNFT.tokenURI(1);
+    const metadata = JSON.parse(atob(tokenURI.split(',')[1]));
+
+    expect(metadata).to.eql({
+      name: 'Test',
+      description: 'Testing',
+      image: 'https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy',
+    });
+  });
+
+  it("returns metadata when only animation URL is specified", async () => {
+    await tier.setTier(signers[1].address, 1, []);
+    const gatedNFT = await deployGatedNFT(
+      {
+        name: "Test",
+        symbol: "TEST",
+        description: "Testing",
+        animationUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        imageUrl:
+          "",
+        animationHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        imageHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+      },
+      tier.address,
+      1,
+      1,
+      0,
+      100
+    );
+
+    expect(await gatedNFT.name()).to.eq("Test");
+    expect(await gatedNFT.symbol()).to.eq("TEST");
+    await expect(gatedNFT.tokenURI(0)).to.be.revertedWith("Nonexistent token");
+
+    await gatedNFT.mint(signers[1].address);
+
+    const tokenURI = await gatedNFT.tokenURI(1);
+    const metadata = JSON.parse(atob(tokenURI.split(',')[1]));
+
+    expect(metadata).to.eql({
+      name: 'Test',
+      description: 'Testing',
+      animation_url: 'https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy',
+    });
+  });
+
+  it("returns metadata when no URLs are specified", async () => {
+    await tier.setTier(signers[1].address, 1, []);
+    const gatedNFT = await deployGatedNFT(
+      {
+        name: "Test",
+        symbol: "TEST",
+        description: "Testing",
+        animationUrl:
+          "",
+        imageUrl:
+          "",
+        animationHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        imageHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+      },
+      tier.address,
+      1,
+      1,
+      0,
+      100
+    );
+
+    expect(await gatedNFT.name()).to.eq("Test");
+    expect(await gatedNFT.symbol()).to.eq("TEST");
+    await expect(gatedNFT.tokenURI(0)).to.be.revertedWith("Nonexistent token");
+
+    await gatedNFT.mint(signers[1].address);
+
+    const tokenURI = await gatedNFT.tokenURI(1);
+    const metadata = JSON.parse(atob(tokenURI.split(',')[1]));
+
+    expect(metadata).to.eql({
+      name: 'Test',
+      description: 'Testing',
+    });
   });
 
   it("returns the total supply", async () => {

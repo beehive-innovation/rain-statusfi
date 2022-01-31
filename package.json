@@ -60,6 +60,7 @@
   "dependencies": {
     "@beehiveinnovation/rain-protocol": "beehive-innovation/rain-protocol#develop",
     "@openzeppelin/contracts": "^4.4.2",
-    "@openzeppelin/contracts-upgradeable": "^4.4.2"
+    "@openzeppelin/contracts-upgradeable": "^4.4.2",
+    "base64-sol": "^1.1.0"
   }
 }
