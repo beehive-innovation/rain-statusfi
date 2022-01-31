@@ -17,7 +17,7 @@ const deployGatedNFT = async (
   minimumStatus: number,
   maxPerAddress: number,
   transferrable: number,
-  totalSupply: number
+  maxMintable: number
 ): Promise<GatedNFT & Contract> => {
   const GatedNFTFactory = await ethers.getContractFactory("GatedNFTFactory");
   const gatedNFTFactory = (await GatedNFTFactory.deploy()) as GatedNFTFactory &
@@ -28,7 +28,7 @@ const deployGatedNFT = async (
     minimumStatus,
     maxPerAddress,
     transferrable,
-    totalSupply
+    maxMintable
   );
   const createChildTypedReceipt = await createChildTypedTx.wait();
   const newChildEvent = createChildTypedReceipt.events.find(
@@ -83,6 +83,36 @@ describe("GatedNFT", async function () {
     expect(await gatedNFT.tokenURI(0)).to.eq(
       "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy"
     );
+  });
+
+  it("returns the total supply", async () => {
+    await tier.setTier(signers[1].address, 1, []);
+    const gatedNFT = await deployGatedNFT(
+      {
+        name: "Test",
+        symbol: "TEST",
+        description: "Testing",
+        animationUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        imageUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        animationHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        imageHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+      },
+      tier.address,
+      1,
+      1,
+      0,
+      100
+    );
+
+    expect(await gatedNFT.totalSupply()).to.eq(0);
+
+    await gatedNFT.mint(signers[1].address);
+
+    expect(await gatedNFT.totalSupply()).to.eq(1);
   });
 
   it("gates minting based on tier", async () => {
