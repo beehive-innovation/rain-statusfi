@@ -5,12 +5,15 @@ pragma solidity ^0.8.10;
 import { ITier } from "@beehiveinnovation/rain-protocol/contracts/tier/ITier.sol";
 // solhint-disable-next-line max-line-length
 import { TierByConstruction } from "@beehiveinnovation/rain-protocol/contracts/tier/TierByConstruction.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import { Counters } from "@openzeppelin/contracts/utils/Counters.sol";
+// solhint-disable-next-line max-line-length
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+// solhint-disable-next-line max-line-length
+import { ERC721Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+// solhint-disable-next-line max-line-length
+import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-contract GatedNFT is ERC721, TierByConstruction, Ownable {
-    using Counters for Counters.Counter;
+contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
+    using CountersUpgradeable for CountersUpgradeable.Counter;
 
     struct Config {
         string name;
@@ -22,19 +25,13 @@ contract GatedNFT is ERC721, TierByConstruction, Ownable {
         bytes32 imageHash;
     }
 
-    event CreatedGatedNFT(
-        address contractAddress,
-        address creator,
-        Config config
-    );
-
     enum Transferrable {
         NonTransferrable,
         Transferrable,
         TierGatedTransferrable
     }
 
-    Counters.Counter private _tokenIdCounter;
+    CountersUpgradeable.Counter private tokenIdCounter;
 
     Config private config;
 
@@ -46,25 +43,24 @@ contract GatedNFT is ERC721, TierByConstruction, Ownable {
 
     uint256 private totalSupply;
 
-    constructor (
+    function initialize (
+        address owner_,
         Config memory config_,
         ITier tier_,
         uint256 minimumStatus_,
         uint256 maxPerAddress_,
         Transferrable transferrable_,
         uint256 totalSupply_
-    ) ERC721(config_.name, config_.symbol) TierByConstruction(tier_) {
+    ) external initializer {
+        __ERC721_init(config_.name, config_.symbol);
+        __Ownable_init();
+        initializeTierByConstruction(tier_);
+        transferOwnership(owner_);
         config = config_;
         minimumStatus = minimumStatus_;
         maxPerAddress = maxPerAddress_;
         transferrable = transferrable_;
         totalSupply = totalSupply_;
-
-        emit CreatedGatedNFT(
-            address(this),
-            msg.sender,
-            config_
-        );
     }
 
     function tokenURI(uint256 tokenId)
@@ -86,10 +82,10 @@ contract GatedNFT is ERC721, TierByConstruction, Ownable {
             balanceOf(to) < maxPerAddress,
             "Address has exhausted allowance"
         );
-        uint256 tokenId = _tokenIdCounter.current();
+        uint256 tokenId = tokenIdCounter.current();
         require(tokenId < totalSupply, "Total supply exhausted");
         _safeMint(to, tokenId);
-        _tokenIdCounter.increment();
+        tokenIdCounter.increment();
         return tokenId;
     }
 

@@ -58,7 +58,8 @@
     "ethers": "5.5.2"
   },
   "dependencies": {
-    "@beehiveinnovation/rain-protocol": "^0.0.16",
-    "@openzeppelin/contracts": "^4.4.2"
+    "@beehiveinnovation/rain-protocol": "beehive-innovation/rain-protocol#develop",
+    "@openzeppelin/contracts": "^4.4.2",
+    "@openzeppelin/contracts-upgradeable": "^4.4.2"
   }
 }
