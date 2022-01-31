@@ -555,4 +555,39 @@ describe("GatedNFT", async function () {
     expect(royaltyInfo.receiver).to.eq(signers[9].address);
     expect(royaltyInfo.royaltyAmount).to.eq(ethers.utils.parseEther("0.02"));
   });
+
+  it("updates royalty recipient", async () => {
+    const gatedNFT = await deployGatedNFT(
+      {
+        name: "Test",
+        symbol: "TEST",
+        description: "Testing",
+        animationUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        imageUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        animationHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        imageHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+      },
+      tier.address,
+      1,
+      1,
+      2,
+      100,
+      signers[9].address,
+      1
+    );
+
+    await expect(
+      gatedNFT.updateRoyaltyRecipient(signers[1].address)
+    ).to.be.revertedWith("Only current recipient can update");
+
+    await gatedNFT
+      .connect(signers[9])
+      .updateRoyaltyRecipient(signers[1].address);
+    const royaltyInfo = await gatedNFT.royaltyInfo(0, 1);
+    expect(royaltyInfo.receiver).to.eq(signers[1].address);
+  });
 });

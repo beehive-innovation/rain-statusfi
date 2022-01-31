@@ -118,6 +118,16 @@ contract GatedNFT is
         return (royaltyRecipient, (_salePrice * royaltyBPS) / 10_000);
     }
 
+    function updateRoyaltyRecipient(address royaltyRecipient_) external
+    {
+        // solhint-disable-next-line reason-string
+        require(
+            msg.sender == royaltyRecipient,
+            "Only current recipient can update"
+        );
+        royaltyRecipient = royaltyRecipient_;
+    }
+
     function _transfer(
         address from,
         address to,
