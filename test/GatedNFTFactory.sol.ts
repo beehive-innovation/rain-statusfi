@@ -47,7 +47,9 @@ describe("GatedNFTFactory", async function () {
       1,
       1,
       0,
-      100
+      100,
+      signers[9].address,
+      1
     );
     const createChildTypedReceipt = await createChildTypedTx.wait();
     const newChildEvent = createChildTypedReceipt.events.find(

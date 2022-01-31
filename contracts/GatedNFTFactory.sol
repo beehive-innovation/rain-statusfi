@@ -29,7 +29,9 @@ contract GatedNFTFactory is Factory {
         uint256 minimumStatus_,
         uint256 maxPerAddress_,
         GatedNFT.Transferrable transferrable_,
-        uint256 maxMintable_
+        uint256 maxMintable_,
+        address royaltyRecipient_,
+        uint256 royaltyBPS
     ) external returns (GatedNFT) {
         GatedNFT gatedNFT = GatedNFT(
             this.createChild(
@@ -40,7 +42,9 @@ contract GatedNFTFactory is Factory {
                     minimumStatus_,
                     maxPerAddress_,
                     transferrable_,
-                    maxMintable_
+                    maxMintable_,
+                    royaltyRecipient_,
+                    royaltyBPS
                 )
             )
         );
@@ -67,7 +71,9 @@ contract GatedNFTFactory is Factory {
             uint256 minimumStatus_,
             uint256 maxPerAddress_,
             GatedNFT.Transferrable transferrable_,
-            uint256 maxMintable_
+            uint256 maxMintable_,
+            address royaltyRecipient_,
+            uint256 royaltyBPS_
         ) = abi.decode(
             data_,
             (
@@ -77,6 +83,8 @@ contract GatedNFTFactory is Factory {
                 uint256,
                 uint256,
                 GatedNFT.Transferrable,
+                uint256,
+                address,
                 uint256
             )
         );
@@ -90,7 +98,9 @@ contract GatedNFTFactory is Factory {
             minimumStatus_,
             maxPerAddress_,
             transferrable_,
-            maxMintable_
+            maxMintable_,
+            royaltyRecipient_,
+            royaltyBPS_
         );
 
         return clone_;

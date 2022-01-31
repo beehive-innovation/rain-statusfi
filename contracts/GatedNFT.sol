@@ -9,11 +9,19 @@ import { TierByConstruction } from "@beehiveinnovation/rain-protocol/contracts/t
 // solhint-disable-next-line max-line-length
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 // solhint-disable-next-line max-line-length
+import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+// solhint-disable-next-line max-line-length
 import { ERC721Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 // solhint-disable-next-line max-line-length
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
+contract GatedNFT is
+    IERC165Upgradeable,
+    IERC2981Upgradeable,
+    ERC721Upgradeable,
+    TierByConstruction,
+    OwnableUpgradeable
+{
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     struct Config {
@@ -44,6 +52,10 @@ contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
 
     uint256 private maxMintable;
 
+    address private royaltyRecipient;
+
+    uint256 private royaltyBPS;
+
     function initialize (
         address owner_,
         Config memory config_,
@@ -51,7 +63,9 @@ contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
         uint256 minimumStatus_,
         uint256 maxPerAddress_,
         Transferrable transferrable_,
-        uint256 maxMintable_
+        uint256 maxMintable_,
+        address royaltyRecipient_,
+        uint256 royaltyBPS_
     ) external initializer {
         __ERC721_init(config_.name, config_.symbol);
         __Ownable_init();
@@ -62,6 +76,8 @@ contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
         maxPerAddress = maxPerAddress_;
         transferrable = transferrable_;
         maxMintable = maxMintable_;
+        royaltyRecipient = royaltyRecipient_;
+        royaltyBPS = royaltyBPS_;
         // Set tokenId to start at 1 instead of 0
         tokenIdCounter.increment();
     }
@@ -88,6 +104,18 @@ contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
         _safeMint(to, tokenId);
         tokenIdCounter.increment();
         return tokenId;
+    }
+
+    function royaltyInfo(uint256, uint256 _salePrice)
+        external
+        view
+        override
+        returns (address receiver, uint256 royaltyAmount)
+    {
+        if (royaltyRecipient == address(0x0)) {
+            return (royaltyRecipient, 0);
+        }
+        return (royaltyRecipient, (_salePrice * royaltyBPS) / 10_000);
     }
 
     function _transfer(
@@ -191,5 +219,16 @@ contract GatedNFT is ERC721Upgradeable, TierByConstruction, OwnableUpgradeable {
                 );
         }
         return "";
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721Upgradeable, IERC165Upgradeable)
+        returns (bool)
+    {
+        return
+            type(IERC2981Upgradeable).interfaceId == interfaceId ||
+            ERC721Upgradeable.supportsInterface(interfaceId);
     }
 }

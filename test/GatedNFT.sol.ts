@@ -17,7 +17,9 @@ const deployGatedNFT = async (
   minimumStatus: number,
   maxPerAddress: number,
   transferrable: number,
-  maxMintable: number
+  maxMintable: number,
+  royaltyRecipient: string,
+  royaltyBPS: number
 ): Promise<GatedNFT & Contract> => {
   const GatedNFTFactory = await ethers.getContractFactory("GatedNFTFactory");
   const gatedNFTFactory = (await GatedNFTFactory.deploy()) as GatedNFTFactory &
@@ -28,7 +30,9 @@ const deployGatedNFT = async (
     minimumStatus,
     maxPerAddress,
     transferrable,
-    maxMintable
+    maxMintable,
+    royaltyRecipient,
+    royaltyBPS
   );
   const createChildTypedReceipt = await createChildTypedTx.wait();
   const newChildEvent = createChildTypedReceipt.events.find(
@@ -71,7 +75,9 @@ describe("GatedNFT", async function () {
       1,
       1,
       0,
-      100
+      100,
+      signers[9].address,
+      1
     );
 
     expect(await gatedNFT.name()).to.eq("Test");
@@ -111,7 +117,9 @@ describe("GatedNFT", async function () {
       1,
       1,
       0,
-      100
+      100,
+      signers[9].address,
+      1
     );
 
     expect(await gatedNFT.name()).to.eq("Test");
@@ -150,7 +158,9 @@ describe("GatedNFT", async function () {
       1,
       1,
       0,
-      100
+      100,
+      signers[9].address,
+      1
     );
 
     expect(await gatedNFT.name()).to.eq("Test");
@@ -189,7 +199,9 @@ describe("GatedNFT", async function () {
       1,
       1,
       0,
-      100
+      100,
+      signers[9].address,
+      1
     );
 
     expect(await gatedNFT.name()).to.eq("Test");
@@ -227,7 +239,9 @@ describe("GatedNFT", async function () {
       1,
       1,
       0,
-      100
+      100,
+      signers[9].address,
+      1
     );
 
     expect(await gatedNFT.totalSupply()).to.eq(0);
@@ -257,7 +271,9 @@ describe("GatedNFT", async function () {
       1,
       1,
       0,
-      100
+      100,
+      signers[9].address,
+      1
     );
 
     await expect(gatedNFT.mint(signers[1].address)).to.be.revertedWith(
@@ -297,7 +313,9 @@ describe("GatedNFT", async function () {
       1,
       1,
       0,
-      100
+      100,
+      signers[9].address,
+      1
     );
 
     gatedNFT.mint(signers[1].address);
@@ -328,6 +346,8 @@ describe("GatedNFT", async function () {
       1,
       1,
       0,
+      1,
+      signers[9].address,
       1
     );
 
@@ -358,7 +378,9 @@ describe("GatedNFT", async function () {
       1,
       1,
       0,
-      100
+      100,
+      signers[9].address,
+      1
     );
 
     const mintTx = await gatedNFT.mint(signers[1].address);
@@ -395,7 +417,9 @@ describe("GatedNFT", async function () {
       1,
       1,
       2,
-      100
+      100,
+      signers[9].address,
+      1
     );
 
     const mintTx = await gatedNFT.mint(signers[1].address);
@@ -433,7 +457,9 @@ describe("GatedNFT", async function () {
       1,
       1,
       2,
-      100
+      100,
+      signers[9].address,
+      1
     );
 
     await gatedNFT.mint(signers[1].address);
@@ -473,7 +499,9 @@ describe("GatedNFT", async function () {
       1,
       1,
       2,
-      100
+      100,
+      signers[9].address,
+      1
     );
 
     const mintTx = await gatedNFT.mint(signers[1].address);
@@ -494,5 +522,34 @@ describe("GatedNFT", async function () {
     expect(transferEvent.args.from).to.eq(signers[1].address);
     expect(transferEvent.args.to).to.eq(signers[2].address);
     expect(transferEvent.args.tokenId).to.eq(tokenId);
+  });
+
+  it("returns royalty info", async () => {
+    const gatedNFT = await deployGatedNFT(
+      {
+        name: "Test",
+        symbol: "TEST",
+        description: "Testing",
+        animationUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        imageUrl:
+          "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        animationHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        imageHash:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+      },
+      tier.address,
+      1,
+      1,
+      2,
+      100,
+      signers[9].address,
+      200 // 2%
+    );
+
+    const royaltyInfo = await gatedNFT.royaltyInfo(0, ethers.utils.parseEther("1.0"));
+    expect(royaltyInfo.receiver).to.eq(signers[9].address);
+    expect(royaltyInfo.royaltyAmount).to.eq(ethers.utils.parseEther("0.02"));
   });
 });
