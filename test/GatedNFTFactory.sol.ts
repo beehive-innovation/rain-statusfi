@@ -5,6 +5,7 @@ import type { Contract } from "ethers";
 import type { GatedNFTFactory } from "../typechain/GatedNFTFactory";
 import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import type { ReadWriteTier } from "../typechain/ReadWriteTier";
+import { getEventArgs } from "./Util";
 
 chai.use(solidity);
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -51,38 +52,42 @@ describe("GatedNFTFactory", async function () {
       signers[9].address,
       1
     );
-    const createChildTypedReceipt = await createChildTypedTx.wait();
-    const newChildEvent = createChildTypedReceipt.events.find(
-      (event) => event.event === "NewChild"
-    );
-    const createdGatedNFTEvent = createChildTypedReceipt.events.find(
-      (event) => event.event === "CreatedGatedNFT"
+
+    const newChildEventArgs = await getEventArgs(
+      createChildTypedTx,
+      "NewChild",
+      gatedNFTFactory
     );
 
-    expect(newChildEvent).to.not.be.empty;
-    expect(createdGatedNFTEvent).to.not.be.empty;
-    expect(createdGatedNFTEvent.args.contractAddress).to.eq(
-      newChildEvent.args.child
-    );
-    expect(createdGatedNFTEvent.args.creator).to.eq(signers[0].address);
-    expect(createdGatedNFTEvent.args.config.name).to.eq("Test");
-    expect(createdGatedNFTEvent.args.config.symbol).to.eq("TEST");
-    expect(createdGatedNFTEvent.args.config.description).to.eq("Testing");
-    expect(createdGatedNFTEvent.args.config.animationUrl).to.eq(
-      "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy"
-    );
-    expect(createdGatedNFTEvent.args.config.imageUrl).to.eq(
-      "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy"
-    );
-    expect(createdGatedNFTEvent.args.config.animationHash).to.eq(
-      "0x0000000000000000000000000000000000000000000000000000000000000000"
-    );
-    expect(createdGatedNFTEvent.args.config.imageHash).to.eq(
-      "0x0000000000000000000000000000000000000000000000000000000000000000"
+    const gatedNFT = (await ethers.getContractFactory("GatedNFT")).attach(
+      newChildEventArgs.child
     );
 
-    const GatedNFT = await ethers.getContractFactory("GatedNFT");
-    const gatedNFT = GatedNFT.attach(newChildEvent.args.child);
+    const createdGatedNFTEventArgs = await getEventArgs(
+      createChildTypedTx,
+      "CreatedGatedNFT",
+      gatedNFT
+    );
+
+    expect(createdGatedNFTEventArgs.contractAddress).to.eq(
+      newChildEventArgs.child
+    );
+    expect(createdGatedNFTEventArgs.creator).to.eq(signers[0].address);
+    expect(createdGatedNFTEventArgs.config.name).to.eq("Test");
+    expect(createdGatedNFTEventArgs.config.symbol).to.eq("TEST");
+    expect(createdGatedNFTEventArgs.config.description).to.eq("Testing");
+    expect(createdGatedNFTEventArgs.config.animationUrl).to.eq(
+      "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy"
+    );
+    expect(createdGatedNFTEventArgs.config.imageUrl).to.eq(
+      "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy"
+    );
+    expect(createdGatedNFTEventArgs.config.animationHash).to.eq(
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+    );
+    expect(createdGatedNFTEventArgs.config.imageHash).to.eq(
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+    );
 
     expect(await gatedNFT.owner()).to.eq(signers[0].address);
   });

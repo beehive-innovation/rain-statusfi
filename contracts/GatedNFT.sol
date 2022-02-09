@@ -23,6 +23,12 @@ contract GatedNFT is
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
+    event CreatedGatedNFT(
+        address contractAddress,
+        address creator,
+        Config config
+    );
+
     struct Config {
         string name;
         string symbol;
@@ -85,6 +91,12 @@ contract GatedNFT is
         royaltyBPS = royaltyBPS_;
         // Set tokenId to start at 1 instead of 0
         tokenIdCounter.increment();
+
+        emit CreatedGatedNFT(
+            address(this),
+            owner_,
+            config_
+        );
     }
 
     function tokenURI(uint256 tokenId)

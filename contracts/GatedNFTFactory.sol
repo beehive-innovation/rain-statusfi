@@ -9,12 +9,6 @@ import { ITier } from "@beehiveinnovation/rain-protocol/contracts/tier/ITier.sol
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
 
 contract GatedNFTFactory is Factory {
-    event CreatedGatedNFT(
-        address contractAddress,
-        address creator,
-        GatedNFT.Config config
-    );
-
     address private immutable implementation;
 
     constructor() {
@@ -33,7 +27,7 @@ contract GatedNFTFactory is Factory {
         address royaltyRecipient_,
         uint256 royaltyBPS
     ) external returns (GatedNFT) {
-        GatedNFT gatedNFT = GatedNFT(
+        return GatedNFT(
             this.createChild(
                 abi.encode(
                     msg.sender,
@@ -48,14 +42,6 @@ contract GatedNFTFactory is Factory {
                 )
             )
         );
-
-        emit CreatedGatedNFT(
-            address(gatedNFT),
-            msg.sender,
-            config_
-        );
-
-        return gatedNFT;
     }
 
     function _createChild(bytes calldata data_)
