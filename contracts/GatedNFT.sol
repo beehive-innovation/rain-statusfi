@@ -5,7 +5,7 @@ pragma solidity ^0.8.10;
 import { ITier } from "@beehiveinnovation/rain-protocol/contracts/tier/ITier.sol";
 import { Base64 } from "base64-sol/base64.sol";
 // solhint-disable-next-line max-line-length
-import { TierByConstruction } from "@beehiveinnovation/rain-protocol/contracts/tier/TierByConstruction.sol";
+import { TierReport } from "@beehiveinnovation/rain-protocol/contracts/tier/libraries/TierReport.sol";
 // solhint-disable-next-line max-line-length
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 // solhint-disable-next-line max-line-length
@@ -19,7 +19,6 @@ contract GatedNFT is
     IERC165Upgradeable,
     IERC2981Upgradeable,
     ERC721Upgradeable,
-    TierByConstruction,
     OwnableUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -43,6 +42,8 @@ contract GatedNFT is
     CountersUpgradeable.Counter private tokenIdCounter;
 
     Config private config;
+
+    ITier public tier;
 
     uint256 private minimumStatus;
 
@@ -73,8 +74,8 @@ contract GatedNFT is
         );
         __ERC721_init(config_.name, config_.symbol);
         __Ownable_init();
-        initializeTierByConstruction(tier_);
         transferOwnership(owner_);
+        tier = ITier(tier_);
         config = config_;
         minimumStatus = minimumStatus_;
         maxPerAddress = maxPerAddress_;
@@ -98,7 +99,13 @@ contract GatedNFT is
     }
 
     function mint(address to) external returns (uint256) {
-        require(isTier(to, minimumStatus), "Address missing required tier");
+        require(
+            TierReport.tierAtBlockFromReport(
+                tier.report(to),
+                block.number
+            ) >= minimumStatus,
+            "Address missing required tier"
+        );
         require(
             balanceOf(to) < maxPerAddress,
             "Address has exhausted allowance"
@@ -148,7 +155,10 @@ contract GatedNFT is
 
         if (transferrable == Transferrable.TierGatedTransferrable) {
             require(
-                isTier(to, minimumStatus),
+                TierReport.tierAtBlockFromReport(
+                    tier.report(to),
+                    block.number
+                ) >= minimumStatus,
                 "Address missing required tier"
             );
         }
