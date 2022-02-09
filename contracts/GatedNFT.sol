@@ -67,6 +67,10 @@ contract GatedNFT is
         address royaltyRecipient_,
         uint256 royaltyBPS_
     ) external initializer {
+        require(
+            royaltyRecipient_ != address(0),
+            "Recipient cannot be 0 address"
+        );
         __ERC721_init(config_.name, config_.symbol);
         __Ownable_init();
         initializeTierByConstruction(tier_);
@@ -120,6 +124,10 @@ contract GatedNFT is
 
     function updateRoyaltyRecipient(address royaltyRecipient_) external
     {
+        require(
+            royaltyRecipient_ != address(0),
+            "Recipient cannot be 0 address"
+        );
         // solhint-disable-next-line reason-string
         require(
             msg.sender == royaltyRecipient,
