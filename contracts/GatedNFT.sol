@@ -110,7 +110,7 @@ contract GatedNFT is
         return tokenId;
     }
 
-    function royaltyInfo(uint256, uint256 _salePrice)
+    function royaltyInfo(uint256, uint256 salePrice_)
         external
         view
         override
@@ -119,7 +119,7 @@ contract GatedNFT is
         if (royaltyRecipient == address(0x0)) {
             return (royaltyRecipient, 0);
         }
-        return (royaltyRecipient, (_salePrice * royaltyBPS) / 10_000);
+        return (royaltyRecipient, (salePrice_ * royaltyBPS) / 10_000);
     }
 
     function updateRoyaltyRecipient(address royaltyRecipient_) external
