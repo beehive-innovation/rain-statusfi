@@ -29,6 +29,10 @@ contract GatedNFT is
         Config config
     );
 
+    event UpdatedRoyaltyRecipient(
+        address royaltyRecipient
+    );
+
     struct Config {
         string name;
         string symbol;
@@ -152,7 +156,10 @@ contract GatedNFT is
             msg.sender == royaltyRecipient,
             "Only current recipient can update"
         );
+
         royaltyRecipient = royaltyRecipient_;
+
+        emit UpdatedRoyaltyRecipient(royaltyRecipient_);
     }
 
     function _transfer(

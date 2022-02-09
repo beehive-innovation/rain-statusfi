@@ -6,6 +6,7 @@ import type { GatedNFT, ConfigStruct } from "../typechain/GatedNFT";
 import type { GatedNFTFactory } from "../typechain/GatedNFTFactory";
 import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import type { ReadWriteTier } from "../typechain/ReadWriteTier";
+import { getEventArgs } from "./Util";
 
 chai.use(solidity);
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -584,9 +585,17 @@ describe("GatedNFT", async function () {
       gatedNFT.updateRoyaltyRecipient(signers[1].address)
     ).to.be.revertedWith("Only current recipient can update");
 
-    await gatedNFT
+    const tx = await gatedNFT
       .connect(signers[9])
       .updateRoyaltyRecipient(signers[1].address);
+    const updatedRoyaltyRecipientEventArgs = await getEventArgs(
+      tx,
+      "UpdatedRoyaltyRecipient",
+      gatedNFT
+    );
+    expect(updatedRoyaltyRecipientEventArgs.royaltyRecipient).to.eq(
+      signers[1].address
+    );
     const royaltyInfo = await gatedNFT.royaltyInfo(0, 1);
     expect(royaltyInfo.receiver).to.eq(signers[1].address);
   });
