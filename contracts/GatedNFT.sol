@@ -74,7 +74,7 @@ contract GatedNFT is
 
     uint256 private royaltyBPS;
 
-    function initialize (
+    function initialize(
         address owner_,
         Config memory config_,
         ITier tier_,
