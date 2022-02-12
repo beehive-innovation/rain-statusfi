@@ -26,7 +26,14 @@ contract GatedNFT is
     event CreatedGatedNFT(
         address contractAddress,
         address creator,
-        Config config
+        Config config,
+        ITier tier,
+        uint256 minimumStatus,
+        uint256 maxPerAddress,
+        Transferrable transferrable,
+        uint256 maxMintable,
+        address royaltyRecipient,
+        uint256 royaltyBPS
     );
 
     event UpdatedRoyaltyRecipient(
@@ -99,7 +106,14 @@ contract GatedNFT is
         emit CreatedGatedNFT(
             address(this),
             owner_,
-            config_
+            config_,
+            tier_,
+            minimumStatus_,
+            maxPerAddress_,
+            transferrable_,
+            maxMintable_,
+            royaltyRecipient_,
+            royaltyBPS_
         );
     }
 

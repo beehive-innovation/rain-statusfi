@@ -88,6 +88,13 @@ describe("GatedNFTFactory", async function () {
     expect(createdGatedNFTEventArgs.config.imageHash).to.eq(
       "0x0000000000000000000000000000000000000000000000000000000000000000"
     );
+    expect(createdGatedNFTEventArgs.tier).to.eq(tier.address);
+    expect(createdGatedNFTEventArgs.minimumStatus).to.eq(1);
+    expect(createdGatedNFTEventArgs.maxPerAddress).to.eq(1);
+    expect(createdGatedNFTEventArgs.transferrable).to.eq(0);
+    expect(createdGatedNFTEventArgs.maxMintable).to.eq(100);
+    expect(createdGatedNFTEventArgs.royaltyRecipient).to.eq(signers[9].address);
+    expect(createdGatedNFTEventArgs.royaltyBPS).to.eq(1);
 
     expect(await gatedNFT.owner()).to.eq(signers[0].address);
   });
