@@ -2,14 +2,6 @@
   "name": "@beehiveinnovation/rain-statusfi",
   "description": "Rain StatusFi",
   "version": "0.0.1",
-  "files": [
-    "/contracts/*.sol",
-    "/contracts/**/*.sol",
-    "/artifacts/*.json",
-    "/typechain/*.d.ts",
-    "/typechain/**/*.ts",
-    "/dist"
-  ],
   "author": "Beehive Innovation",
   "license": "CAL",
   "repository": {
